@@ -127,7 +127,7 @@ export default {
         child.init();
       });
 // exclude single marker from clustering
-      this.map["markers"] = this.markers.length ? this.excludeMarkerCluster > -1 ? this.markers.splice(this.excludeMarkerCluster,1) : this.markers
+      this.map["markers"] = this.markers.splice(0,1)
 
       if (Object.keys(this.cluster).length > 0) {
         this.initCluster()

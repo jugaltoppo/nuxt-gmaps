@@ -37,6 +37,10 @@ export default {
         };
       },
     },
+    excludeMarkerCluster: {
+      type: Number,
+      default: -1,
+    }
   },
 
   data() {
@@ -121,8 +125,8 @@ export default {
       this.$children.forEach((child) => {
         child.init();
       });
-
-      this.map["markers"] = this.markers;
+// exclude single marker from clustering
+      this.map["markers"] = this.markers.length ? this.excludeMarkerCluster > -1 ? this.markers.splice(this.excludeMarkerCluster,1) : this.markers;
 
       if (Object.keys(this.cluster).length > 0) {
         this.initCluster()

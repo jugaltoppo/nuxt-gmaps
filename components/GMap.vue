@@ -74,6 +74,7 @@ export default {
   },
 
   async mounted() {
+    console.log(this.excludeMarkerCluster, markerExcluded)
     if (this.$GMaps.loaded === false) {
       this.$GMaps.loaded = true;
       try {

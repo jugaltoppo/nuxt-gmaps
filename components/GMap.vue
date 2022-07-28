@@ -4,11 +4,9 @@
     <slot />
   </div>
 </template>
-
 <script>
-import { Loader } from "@googlemaps/js-api-loader";
-import { MarkerClusterer } from "@googlemaps/markerclusterer";
-
+import GoogleMapsApiLoader from "google-maps-api-loader";
+const MarkerClusterer = require("node-js-marker-clusterer");
 export default {
   props: {
     options: {
@@ -37,12 +35,11 @@ export default {
         };
       },
     },
-    excludeMarkerCluster: {
+    excludeMarkerClusterIndex:{
       type: Number,
-      default: -1,
+      default: 0,
     }
   },
-
   data() {
     return {
       map: null,
@@ -72,9 +69,7 @@ export default {
       ],
     };
   },
-
   async mounted() {
-    console.log(this.excludeMarkerCluster, 'markerExcluded')
     if (this.$GMaps.loaded === false) {
       this.$GMaps.loaded = true;
       try {
@@ -82,27 +77,21 @@ export default {
           apiKey: this.$GMaps.apiKey,
           language: this.language,
         };
-
         if (this.$GMaps.libraries !== undefined) {
           GMapSettings["libraries"] = this.$GMaps.libraries;
         }
-
-        const loader = new Loader(GMapSettings);
-        const google = await loader.load();
+        const google = GoogleMapsApiLoader(GMapSettings);
         this.$GMaps.google = google;
       } catch (e) {}
     }
-
     this.google = await this.$GMaps.google;
     this.initMap();
     this.$emit("init", this.google);
     this.$emit("loaded", this.google);
   },
-
   beforeDestroy() {
     this.$GMaps.loaded = false;
   },
-
   methods: {
     initMap() {
       this.map = new google.maps.Map(this.$refs.map, {
@@ -110,7 +99,6 @@ export default {
         zoom: this.zoom,
         ...this.options,
       });
-
       this.initChildren();
       this.events.forEach((event) => {
         this.map.addListener(event, (e) => {
@@ -118,37 +106,27 @@ export default {
         });
       });
     },
-
     initChildren() {
-      if (this.markerCluster !== null) this.markerCluster.clearMarkers();
       if (this.markers.length > 0) this.markers = [];
-
       this.$children.forEach((child) => {
         child.init();
       });
-// exclude single marker from clustering
-      this.map["markers"] = this.markers.splice(0,1)
-
+      this.map["markers"] = this.markers;
       if (Object.keys(this.cluster).length > 0) {
-        this.initCluster()
+        this.initCluster();
       }
     },
-
-    initCluster(){
-      const map = this.map;
-      const markers = this.markers.filter((m) => m.getVisible());
-      const clusterOptions = this.cluster.options;
-      if(this.markerCluster !== null) this.markerCluster.clearMarkers();
-      this.markerCluster = new MarkerClusterer({
-        map,
-        markers,
-        clusterOptions,
-      });
-    }
+    initCluster() {
+      if (this.markerCluster !== null) this.markerCluster.clearMarkers();
+      this.markerCluster = new MarkerClusterer(
+        this.map,
+        this.markers.filter((m) => m.getVisible()).splice(this.excludeMarkerClusterIndex),
+        { ...this.cluster.options }
+      );
+    },
   },
 };
 </script>
-
 <style>
 .GMap__Wrapper {
   width: 100%;

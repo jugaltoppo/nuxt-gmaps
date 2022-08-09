@@ -22,7 +22,6 @@
   ],	
   "dependencies": {	
     "google-maps-api-loader": "^1.1.1",	
-    "node-js-marker-clusterer": "^1.0.0",
-    "google-maps-infobox": "^2.0.0"
+    "node-js-marker-clusterer": "^1.0.0"
   }	
 }
